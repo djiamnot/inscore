@@ -72,15 +72,17 @@ bool HTTPSForwarder::initialize(const IAppl* appl)
 QSslSocket* HTTPSForwarder::newConnection (qintptr socketDescriptor)
 {
 	if (fSsl.cert || fSsl.key || fSsl.cacert) {
+                QList<QSslCertificate> listCA;
+                listCA.append(*fSsl.cacert);
 		QSslSocket* socket = new QSslSocket(this);
 		QSslConfiguration config = socket->sslConfiguration();
-		config.addCaCertificate (*fSsl.cacert);
+		config.setCaCertificates (listCA);
 		config.setLocalCertificate (*fSsl.cert);
 		config.setPrivateKey(*fSsl.key);
 		config.setPeerVerifyMode(QSslSocket::VerifyNone);
 		config.setSslOption(QSsl::SslOptionDisableServerNameIndication, true);
 		config.setSslOption(QSsl::SslOptionDisableLegacyRenegotiation, true);
-		
+
 		socket->setSslConfiguration(config);
 		socket->setSocketOption(QAbstractSocket::KeepAliveOption, true );
 		if (socket->setSocketDescriptor(socketDescriptor)) {
